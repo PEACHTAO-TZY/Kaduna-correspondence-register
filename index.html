@@ -18,8 +18,8 @@ label{display:block;font-size:12px;color:#475569;margin-bottom:5px}input,select,
 .filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;align-items:end;margin-bottom:12px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:8px}table{width:100%;border-collapse:collapse;min-width:1400px;background:white}th,td{padding:10px 9px;text-align:left;border-bottom:1px solid #e8edf2;font-size:12px;vertical-align:top}th{background:#f7f9fc;color:#475569;position:sticky;top:0}.tag{display:inline-block;border-radius:20px;padding:3px 8px;background:#eaf1ff;color:#2454a6;font-size:11px}.tag.green{background:#e7f7ed;color:#187443}.tag.orange{background:#fff2d9;color:#8a5a00}.empty{text-align:center;color:var(--muted);padding:28px}
 .ref-helper{background:#f8fafc;border:1px dashed #cbd5e1;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:12px;color:#334155}
 .ref-helper b{color:var(--navy)}
+.settings-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 .settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.setting-box{border:1px solid var(--line);border-radius:8px;padding:12px}.setting-box h3{font-size:13px;margin:0 0 8px}.setting-box ul{list-style:none;padding:0;margin:8px 0}.setting-box li{display:flex;justify-content:space-between;align-items:center;gap:6px;border-bottom:1px solid #edf1f5;padding:6px 0;font-size:12px}.addline{display:flex;gap:6px}.addline input{min-width:0}
-details.panel summary{cursor:pointer;font-weight:700;font-size:17px;color:#17324d;outline:none}
 footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.grid,.settings-grid{grid-template-columns:repeat(1,1fr)}.filters{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}}
 @media(max-width:540px){header{padding:18px}.grid,.settings-grid{grid-template-columns:1fr}.wide{grid-column:span 1}.filters{grid-template-columns:1fr}}
@@ -47,7 +47,6 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
   <section class="panel">
     <h2 id="formTitle">信函登记 / Letter Registration</h2>
     
-    <!-- 实时显示各项目最新发函编号的速查提示栏 -->
     <div class="ref-helper" id="latestRefHelper">
       <b>💡 各项目最新发函编号速查（用于便捷接号）：</b>
       <span id="latestRefText" style="color:#64748b;margin-left:8px;">正在计算各项目最新编号...</span>
@@ -76,11 +75,16 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
     </form>
   </section>
 
-  <details class="panel">
-    <summary>基础选项管理 / Manage Dropdown Options (点击展开)</summary>
-    <p style="font-size:12px;color:#64748b;margin:8px 0 0">可自行添加、编辑和删除项目名称、信函类型选项（保存在本地浏览器中）。/ Expand to add, edit or delete dropdown options.</p>
-    <div class="settings-grid" id="settings"></div>
-  </details>
+  <section class="panel">
+    <div class="settings-header" onclick="toggleSettings()">
+      <h2 style="margin:0;">基础选项管理 / Manage Dropdown Options</h2>
+      <button type="button" class="small secondary" id="toggleSettingsBtn">展开设置 / Expand ▼</button>
+    </div>
+    <div id="settingsBody" style="display:none;margin-top:12px;">
+      <p style="font-size:12px;color:#64748b;margin:0 0 10px">可自行添加、编辑和删除项目名称、信函类型选项（保存在本地浏览器中）。/ Add, edit or delete dropdown options.</p>
+      <div class="settings-grid" id="settings"></div>
+    </div>
+  </section>
 
   <section class="panel">
     <h2>信函查询与导出 / Search & Export</h2>
@@ -103,10 +107,9 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
   <footer>云端协同版 · Google Sheets Backend · CSV Export</footer>
 </main>
 <script>
-// ★★★ 请在此处填入你的 Google Apps Script Web 应用网址 ★★★
 const API_URL = 'https://script.google.com/macros/s/AKfycbxzzfDWucPzVLYqbAmGdbCWeyTAr4VXRMprrn2qy-sOhdunlNQ1T-PArDIFu8SRuK1FLw/exec';
 
-const OPT_KEY='kaduna_correspondence_options_v4';
+const OPT_KEY='kaduna_correspondence_options_v5';
 const defaults={
  project:['Customs Service Zone B Headquarters','RABAH ROAD (ROAD 9)','KABALA ROAD (ROAD 11)','RIGASA ROAD','KADUNA PROJECT GROUP'],
  type:['Outgoing / 发函','Incoming / 来函']
@@ -118,6 +121,18 @@ Object.keys(defaults).forEach(k=>{if(!Array.isArray(options[k]))options[k]=defau
 let data=[];
 const $=id=>document.getElementById(id), val=id=>$(id).value.trim();
 const fields=['project','type','refNo','letterDate','from','to','subject','chineseSubject','cc','replyRequired','replyStatus','replyDate','replyRefNo','description','remarks'];
+
+function toggleSettings(){
+  const body = $('settingsBody');
+  const btn = $('toggleSettingsBtn');
+  if(body.style.display === 'none'){
+    body.style.display = 'block';
+    btn.textContent = '收起设置 / Collapse ▲';
+  } else {
+    body.style.display = 'none';
+    btn.textContent = '展开设置 / Expand ▼';
+  }
+}
 
 function setStatus(text){$('syncStatus').textContent=text;}
 
@@ -136,18 +151,15 @@ async function loadFromCloud(){
   }
 }
 
-// 自动计算并显示各项目最新的发函编号
 function updateLatestRefHelper(){
   let helperText = '';
   options.project.forEach(proj => {
-    // 筛选出属于该项目且类型包含 Outgoing（发函）且填了编号的记录
     const projOuts = data.filter(r => r.project === proj && r.type.toLowerCase().includes('outgoing') && r.refNo);
     if(projOuts.length > 0) {
-      // 按照日期排序取最新的一条
       projOuts.sort((a,b)=>(b.letterDate||'').localeCompare(a.letterDate||''));
-      helperText += `<b>[${proj}]</b> 最新编号: <span style="color:#2563eb;font-weight:bold;">${esc(projOuts[0].refNo)}</span> &nbsp;&nbsp;`;
+      helperText += `<b>[${esc(proj)}]</b> 最新编号: <span style="color:#2563eb;font-weight:bold;">${esc(projOuts[0].refNo)}</span> &nbsp;&nbsp;`;
     } else {
-      helperText += `<b>[${proj}]</b> 最新编号: <span style="color:#94a3b8;">暂无发函</span> &nbsp;&nbsp;`;
+      helperText += `<b>[${esc(proj)}]</b> 最新编号: <span style="color:#94a3b8;">暂无发函</span> &nbsp;&nbsp;`;
     }
   });
   $('latestRefText').innerHTML = helperText;
@@ -170,7 +182,7 @@ async function syncToCloud(payload){
   }
 }
 
-function saveOptions(){localStorage.setItem(OPT_KEY,JSON.stringify(options));renderOptions();render()}
+function saveOptions(){localStorage.setItem(OPT_KEY,JSON.stringify(options));renderOptions();render();updateLatestRefHelper();}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fillSelect(id,arr,placeholder='请选择 / Select',selected=''){
  const el=$(id),old=selected||el.value;el.innerHTML=`<option value="">${placeholder}</option>`+arr.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
@@ -179,7 +191,7 @@ function fillSelect(id,arr,placeholder='请选择 / Select',selected=''){
 function renderOptions(){
  fillSelect('project',options.project);fillSelect('type',options.type);
  const groups=[['project','项目名称 / Projects'],['type','信函类型 / Correspondence Types']];
- $('settings').innerHTML=groups.map(([key,title])=>`<div class="setting-box"><h3>${title}</h3><div class="addline"><input id="new_${key}" placeholder="新增 / Add"><button class="small" onclick="addOption('${key}')">添加 / Add</button></div><ul>${options[key].map((v,i)=>`<li><span>${esc(v)}</span><span><button class="small secondary" onclick="editOption('${key}',${i})">编辑 / Edit</button> <button class="small danger" onclick="removeOption('${key}',${i})">删除 / Delete</button></span></li>`).join('')||'<li style="color:#94a3b8">暂无选项 / Empty</li>'}</ul></div>`).join('');
+ $('settings').innerHTML=groups.map(([key,title])=>`<div class="setting-box"><h3>${title}</h3><div class="addline"><input id="new_${key}" placeholder="新增 / Add"><button type="button" class="small" onclick="addOption('${key}')">添加 / Add</button></div><ul>${options[key].map((v,i)=>`<li><span>${esc(v)}</span><span><button type="button" class="small secondary" onclick="editOption('${key}',${i})">编辑 / Edit</button> <button type="button" class="small danger" onclick="removeOption('${key}',${i})">删除 / Delete</button></span></li>`).join('')||'<li style="color:#94a3b8">暂无选项 / Empty</li>'}</ul></div>`).join('');
  const p=$('filterProject').value,t=$('filterType').value;
  $('filterProject').innerHTML='<option value="">全部项目 / All</option>'+options.project.map(x=>`<option>${esc(x)}</option>`).join('');if(options.project.includes(p))$('filterProject').value=p;
  $('filterType').innerHTML='<option value="">全部类型 / All</option>'+options.type.map(x=>`<option>${esc(x)}</option>`).join('');if(options.type.includes(t))$('filterType').value=t;
@@ -223,7 +235,7 @@ function filtered(){
 function render(){
  $('total').textContent=data.length;$('outgoing').textContent=data.filter(x=>x.type.toLowerCase().includes('outgoing')).length;$('incoming').textContent=data.filter(x=>x.type.toLowerCase().includes('incoming')).length;$('pending').textContent=data.filter(x=>x.replyStatus==='Pending').length;
  const list=filtered();$('resultCount').textContent=`显示 ${list.length} 条记录 / ${list.length} records（共 ${data.length} 条 / total）`;
- $('rows').innerHTML=list.length?list.map(r=>`<tr><td>${esc(r.project)}</td><td><span class="tag">${esc(r.type)}</span></td><td>${esc(r.refNo||'—')}</td><td>${esc(r.letterDate)}</td><td>${esc(r.subject)}</td><td>${esc(r.chineseSubject||'—')}</td><td>${esc(r.from)}</td><td>${esc(r.to)}</td><td>${esc(r.cc||'—')}</td><td>${r.replyRequired==='Yes'?'是 / Yes':'否 / No'}</td><td><span class="tag ${r.replyStatus==='Replied'?'green':r.replyStatus==='Pending'?'orange':''}">${r.replyStatus==='Replied'?'已回复 / Replied':r.replyStatus==='Pending'?'暂未回复 / Pending':'无需回复 / Not Required'}</span></td><td>${esc(r.replyDate||'—')}</td><td>${esc(r.replyRefNo||'—')}</td><td><button class="small secondary" onclick="editRecord('${r.id}')">编辑 / Edit</button> <button class="small danger" onclick="deleteRecord('${r.id}')">删除 / Delete</button></td></tr>`).join(''):'<tr><td colspan="14" class="empty">没有符合条件的记录 / No matching records</td></tr>';
+ $('rows').innerHTML=list.length?list.map(r=>`<tr><td>${esc(r.project)}</td><td><span class="tag">${esc(r.type)}</span></td><td>${esc(r.refNo||'—')}</td><td>${esc(r.letterDate)}</td><td>${esc(r.subject)}</td><td>${esc(r.chineseSubject||'—')}</td><td>${esc(r.from)}</td><td>${esc(r.to)}</td><td>${esc(r.cc||'—')}</td><td>${r.replyRequired==='Yes'?'是 / Yes':'否 / No'}</td><td><span class="tag ${r.replyStatus==='Replied'?'green':r.replyStatus==='Pending'?'orange':''}">${r.replyStatus==='Replied'?'已回复 / Replied':r.replyStatus==='Pending'?'暂未回复 / Pending':'无需回复 / Not Required'}</span></td><td>${esc(r.replyDate||'—')}</td><td>${esc(r.replyRefNo||'—')}</td><td><button type="button" class="small secondary" onclick="editRecord('${r.id}')">编辑 / Edit</button> <button type="button" class="small danger" onclick="deleteRecord('${r.id}')">删除 / Delete</button></td></tr>`).join(''):'<tr><td colspan="14" class="empty">没有符合条件的记录 / No matching records</td></tr>';
 }
 $('letterForm').addEventListener('submit',async e=>{
  e.preventDefault();const o=formObj(),id=$('recordId').value;
@@ -234,7 +246,7 @@ $('letterForm').addEventListener('submit',async e=>{
  resetForm();
  alert('保存并同步成功 / Saved & Synced.');
 });
-window.editRecord=id=>{const r=data.find(x=>x.id===id);if(!r)return;$('recordId').value=id;fields.forEach(k=>$(k).value=r[k]||'');replyControls();$('replyStatus').value=r.replyStatus||'';$('replyDate').value=r.replyDate||'';$('replyRefNo').value=r.replyRefNo||'';if(r.replyStatus==='Replied'){$('replyRefNo').disabled=false;}$('formTitle').textContent='编辑信函 / Edit Correspondence';$('saveBtn').textContent='保存修改并同步 / Save Changes';window.scrollTo({top:0,behavior:'smooth'})};
+window.editRecord=id=>{const r=data.find(x=>x.id===id);if(!r)return;$('recordId').value=id;fields.forEach(k=>$(k).value=r[k]||'');replyControls();$('replyStatus').value=r.replyStatus||'';$('replyDate').value=r.replyDate||'';$('replyRefNo').value=r.replyRefNo||'';if(r.replyStatus==='Replied'){$('replyRefNo').disabled=false;}$('formTitle').textContent='信函修改 / Edit Correspondence';$('saveBtn').textContent='保存修改并同步 / Save Changes';window.scrollTo({top:0,behavior:'smooth'})};
 window.deleteRecord=async id=>{if(!confirm('确定从云端删除这条记录？此操作所有人都将同步删除！/ Delete from cloud?'))return;await syncToCloud({ action: 'delete', id: id });};
 $('resetBtn').onclick=resetForm;
 ['search','filterProject','filterType','filterReply'].forEach(id=>$(id).addEventListener('input',render));
@@ -245,7 +257,7 @@ $('exportBtn').onclick=()=>{
  const csv='\uFEFF'+cols.map(c=>csvCell(c[1])).join(',')+'\r\n'+filtered().map(r=>cols.map(c=>csvCell(r[c[0]])).join(',')).join('\r\n');download(new Blob([csv],{type:'text/csv;charset=utf-8;'}),'Correspondence_Register.csv');
 };
 $('backupBtn').onclick=()=>download(new Blob([JSON.stringify({data,options},null,2)],{type:'application/json'}),'Correspondence_Backup.json');
-function download(blob,name){const a=document.createElement('a'],u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
+function download(blob,name){const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
 
 renderOptions();replyControls();loadFromCloud();
 </script>
