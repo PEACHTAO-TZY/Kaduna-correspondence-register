@@ -5,37 +5,93 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>卡杜纳州项目群信函登记系统 | Correspondence Register</title>
 <style>
-:root{--navy:#17324d;--blue:#2563eb;--bg:#f3f6fa;--line:#dce3eb;--muted:#64748b}
+:root{--navy:#17324d;--blue:#2563eb;--bg:#f3f6fa;--line:#cbd5e1;--muted:#64748b}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,"Microsoft YaHei",sans-serif;background:var(--bg);color:#172033}
 header{background:var(--navy);color:white;padding:22px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 header h1{margin:0 0 6px;font-size:22px}header p{margin:0;color:#d5e1ee;font-size:13px}
 .sync-badge{background:rgba(255,255,255,0.15);padding:6px 12px;border-radius:20px;font-size:12px;display:flex;align-items:center;gap:8px}
-main{max-width:1450px;margin:22px auto;padding:0 18px}
+main{max-width:1550px;margin:22px auto;padding:0 18px}
 .cards{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:12px;margin-bottom:16px}.card,.panel{background:white;border:1px solid var(--line);border-radius:10px}.card{padding:15px}.card small{color:var(--muted)}.num{font-size:27px;font-weight:700;margin-top:6px}
 .panel{padding:18px;margin-bottom:16px}.panel h2{font-size:17px;margin:0 0 15px}.grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}
 label{display:block;font-size:12px;color:#475569;margin-bottom:5px}input,select,textarea{width:100%;padding:9px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;font:inherit;font-size:13px}textarea{min-height:68px;resize:vertical}.wide{grid-column:span 2}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:6px;padding:9px 14px;background:var(--blue);color:white;cursor:pointer;font-size:13px}button:disabled{opacity:0.6;cursor:not-allowed}button.secondary{background:#e8eef5;color:#24364b}button.danger{background:#b42318}button.small{padding:5px 8px;font-size:11px}
-.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;align-items:end;margin-bottom:12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:6px;padding:9px 14px;background:var(--blue);color:white;cursor:pointer;font-size:13px}button:disabled{opacity:0.6;cursor:not-allowed}button.secondary{background:#e8eef5;color:#24364b}button.danger{background:#b42318}button.small{padding:5px 10px;font-size:11px}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;align-items:end;margin-bottom:14px}
 
-/* 可自由调整列宽的表格设计 */
-.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:650px}
-table{width:100%;border-collapse:collapse;min-width:1400px;background:white;table-layout:auto;}
-th,td{padding:10px 9px;text-align:left;border-bottom:1px solid #e8edf2;border-right:1px solid #f1f5f9;font-size:12px;vertical-align:top;overflow:hidden;text-overflow:ellipsis;resize:horizontal;}
-th{background:#f7f9fc;color:#475569;position:sticky;top:0;z-index:2}
+/* Excel 风格表格容器：固定高度、专属垂直与水平滚动条 */
+.tablewrap{
+  position:relative;
+  max-height:540px; 
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:white;
+}
 
-.tag{display:inline-block;border-radius:20px;padding:3px 8px;background:#eaf1ff;color:#2454a6;font-size:11px}.tag.green{background:#e7f7ed;color:#187443}.tag.orange{background:#fff2d9;color:#8a5a00}.empty{text-align:center;color:var(--muted);padding:28px}
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1600px;
+  table-layout:fixed; /* 确保列宽受控，互不挤压 */
+  background:white;
+}
+
+th, td{
+  padding:11px 10px;
+  text-align:left;
+  border-bottom:1px solid #e2e8f0;
+  border-right:1px solid #edf2f7;
+  font-size:12px;
+  vertical-align:middle;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+/* 表头设计及 Excel 风格的列宽调整把手 */
+th {
+  background:#f8fafc;
+  color:#334155;
+  font-weight:600;
+  position:sticky;
+  top:0;
+  z-index:3;
+  user-select:none;
+}
+
+.resizer {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  cursor: col-resize;
+  z-index: 5;
+}
+.resizer:hover, th.resizing .resizer {
+  background: var(--blue);
+}
+
+.tag{display:inline-block;border-radius:20px;padding:3px 9px;background:#eef2ff;color:#3730a3;font-size:11px;font-weight:500}
+.tag.green{background:#f0fdf4;color:#166534}
+.tag.orange{background:#fffbeb;color:#92400e}
+.empty{text-align:center;color:var(--muted);padding:35px;white-space:normal;}
+
 .settings-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
-.settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.setting-box{border:1px solid var(--line);border-radius:8px;padding:12px}.setting-box h3{font-size:13px;margin:0 0 8px}.setting-box ul{list-style:none;padding:0;margin:8px 0}.setting-box li{display:flex;justify-content:space-between;align-items:center;gap:6px;border-bottom:1px solid #edf1f5;padding:6px 0;font-size:12px}.addline{display:flex;gap:6px}.addline input{min-width:0}
+.settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+.setting-box{border:1px solid var(--line);border-radius:8px;padding:12px}
+.setting-box h3{font-size:13px;margin:0 0 8px}
+.setting-box ul{list-style:none;padding:0;margin:8px 0}
+.setting-box li{display:flex;justify-content:space-between;align-items:center;gap:6px;border-bottom:1px solid #edf1f5;padding:6px 0;font-size:12px}
+.addline{display:flex;gap:6px}.addline input{min-width:0}
 
-/* 下拉操作菜单样式 */
+/* 下拉操作菜单样式优化，确保尺寸合适、不被遮挡 */
 .dropdown{position:relative;display:inline-block;}
-.dropdown-content{display:none;position:absolute;right:0;background-color:#fff;min-width:90px;box-shadow:0px 8px 16px rgba(0,0,0,0.15);z-index:10;border-radius:6px;border:1px solid var(--line);padding:4px;}
-.dropdown-content button{width:100%;text-align:left;margin-bottom:2px;}
+.dropdown-content{display:none;position:absolute;right:0;background-color:#fff;min-width:105px;box-shadow:0px 6px 16px rgba(0,0,0,0.12);z-index:10;border-radius:6px;border:1px solid var(--line);padding:5px;}
+.dropdown-content button{width:100%;text-align:left;margin-bottom:3px;}
 .dropdown:hover .dropdown-content{display:block;}
 
 footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.grid,.settings-grid{grid-template-columns:repeat(1,1fr)}.filters{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}}
-@media(max-width:540px){header{padding:18px}.grid,.settings-grid{grid-template-columns:1fr}.wide{grid-column:span 1}.filters{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -106,22 +162,33 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
       <button type="button" id="exportBtn">导出当前结果 CSV / Export CSV for Excel</button>
       <button type="button" class="secondary" id="backupBtn">备份全部数据 JSON / Backup JSON</button>
     </div>
-    <div class="tablewrap"><table><thead><tr>
-      <th>项目 / Project</th>
-      <th>类型 / Type</th>
-      <th style="cursor:pointer;" onclick="toggleSort('refNo')">编号 / Reference <span id="sortRefIcon">↕</span></th>
-      <th style="cursor:pointer;" onclick="toggleSort('letterDate')">日期 / Date <span id="sortDateIcon">⬇</span></th>
-      <th>主题 / Subject</th>
-      <th>中文信函主体 / Chinese Subject</th>
-      <th>发件单位 / From</th>
-      <th>收件单位 / To</th>
-      <th>抄送单位 / CC</th>
-      <th>是否需回复 / Reply Required</th>
-      <th>回复情况 / Reply Status</th>
-      <th>回复日期 / Reply Date</th>
-      <th>回复信函编号 / Reply Ref No.</th>
-      <th>操作 / Actions</th>
-    </tr></thead><tbody id="rows"><tr><td colspan="14" class="empty">正在从云端加载数据 / Loading...</td></tr></tbody></table></div>
+    
+    <!-- 精美排版与固定高度滚动条的表格区 -->
+    <div class="tablewrap" id="tableContainer">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th style="width:200px;">项目 / Project<div class="resizer"></div></th>
+            <th style="width:120px;">类型 / Type<div class="resizer"></div></th>
+            <th style="width:160px; cursor:pointer;" onclick="toggleSort('refNo')">编号 / Reference <span id="sortRefIcon">↕</span><div class="resizer"></div></th>
+            <th style="width:110px; cursor:pointer;" onclick="toggleSort('letterDate')">日期 / Date <span id="sortDateIcon">⬇</span><div class="resizer"></div></th>
+            <th style="width:220px;">主题 / Subject<div class="resizer"></div></th>
+            <th style="width:180px;">中文信函主体 / Chinese Subject<div class="resizer"></div></th>
+            <th style="width:130px;">发件单位 / From<div class="resizer"></div></th>
+            <th style="width:130px;">收件单位 / To<div class="resizer"></div></th>
+            <th style="width:150px;">抄送单位 / CC<div class="resizer"></div></th>
+            <th style="width:110px;">是否需回复<div class="resizer"></div></th>
+            <th style="width:120px;">回复情况 / Status<div class="resizer"></div></th>
+            <th style="width:110px;">回复日期<div class="resizer"></div></th>
+            <th style="width:140px;">回复编号<div class="resizer"></div></th>
+            <th style="width:90px; text-align:center;">操作</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="14" class="empty">正在从云端加载数据 / Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
     <p id="resultCount" style="color:#64748b;font-size:12px;margin:10px 0 0">显示 0 条记录 / 0 records</p>
   </section>
   <footer>云端协同版 · Google Sheets Backend · CSV Export</footer>
@@ -129,7 +196,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbxzzfDWucPzVLYqbAmGdbCWeyTAr4VXRMprrn2qy-sOhdunlNQ1T-PArDIFu8SRuK1FLw/exec';
 
-const OPT_KEY='kaduna_correspondence_options_v6';
+const OPT_KEY='kaduna_correspondence_options_v7';
 const defaults={
  project:['Customs Service Zone B Headquarters','RABAH ROAD (ROAD 9)','KABALA ROAD (ROAD 11)','RIGASA ROAD','KADUNA PROJECT GROUP'],
  type:['Outgoing / 发函','Incoming / 来函']
@@ -140,7 +207,7 @@ Object.keys(defaults).forEach(k=>{if(!Array.isArray(options[k]))options[k]=defau
 
 let data=[];
 let currentSortField = 'letterDate';
-let currentSortOrder = 'desc'; // 'asc' 正序, 'desc' 倒序
+let currentSortOrder = 'desc';
 
 const $=id=>document.getElementById(id), val=id=>$(id).value.trim();
 const fields=['project','type','refNo','letterDate','from','to','subject','chineseSubject','cc','replyRequired','replyStatus','replyDate','replyRefNo','description','remarks'];
@@ -237,7 +304,6 @@ $('replyStatus').addEventListener('change',()=>{
 });
 function formObj(){let o={};fields.forEach(k=>o[k]=val(k));if(o.replyRequired==='No'){o.replyStatus='Not Required';o.replyDate='';o.replyRefNo=''}if(o.replyRequired==='Yes'&&o.replyStatus==='Pending'){o.replyDate='';o.replyRefNo=''}return o}
 
-// 清理和简化日期显示（只保留 yyyy-mm-dd 或标准格式）
 function formatDate(dStr){
   if(!dStr) return '—';
   try {
@@ -249,10 +315,9 @@ function formatDate(dStr){
       return `${year}-${month}-${day}`;
     }
   }catch(e){}
-  return dStr.split('T')[0]; // 防止带有时区的时间串
+  return dStr.split('T')[0];
 }
 
-// 排序切换函数
 function toggleSort(field){
   if(currentSortField === field){
     currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
@@ -269,7 +334,6 @@ function filtered(){
  const q=val('search').toLowerCase(),p=val('filterProject'),t=val('filterType'),rs=val('filterReply');
  let list = data.filter(r=>(!p||r.project===p)&&(!t||r.type===t)&&(!rs||r.replyStatus===rs)&&(!q||[r.refNo,r.subject,r.chineseSubject,r.cc,r.from,r.to,r.replyRefNo,r.description].join(' ').toLowerCase().includes(q)));
  
- // 应用排序
  list.sort((a,b)=>{
    let v1 = a[currentSortField] || '';
    let v2 = b[currentSortField] || '';
@@ -284,20 +348,20 @@ function render(){
  const list=filtered();$('resultCount').textContent=`显示 ${list.length} 条记录 / ${list.length} records（共 ${data.length} 条 / total）`;
  
  $('rows').innerHTML=list.length?list.map(r=>`<tr>
-   <td>${esc(r.project)}</td>
+   <td title="${esc(r.project)}">${esc(r.project)}</td>
    <td><span class="tag">${esc(r.type)}</span></td>
-   <td>${esc(r.refNo||'—')}</td>
+   <td title="${esc(r.refNo||'—')}">${esc(r.refNo||'—')}</td>
    <td>${esc(formatDate(r.letterDate))}</td>
-   <td>${esc(r.subject)}</td>
-   <td>${esc(r.chineseSubject||'—')}</td>
-   <td>${esc(r.from)}</td>
-   <td>${esc(r.to)}</td>
-   <td>${esc(r.cc||'—')}</td>
+   <td title="${esc(r.subject)}">${esc(r.subject)}</td>
+   <td title="${esc(r.chineseSubject||'—')}">${esc(r.chineseSubject||'—')}</td>
+   <td title="${esc(r.from)}">${esc(r.from)}</td>
+   <td title="${esc(r.to)}">${esc(r.to)}</td>
+   <td title="${esc(r.cc||'—')}">${esc(r.cc||'—')}</td>
    <td>${r.replyRequired==='Yes'?'是 / Yes':'否 / No'}</td>
-   <td><span class="tag ${r.replyStatus==='Replied'?'green':r.replyStatus==='Pending'?'orange':''}">${r.replyStatus==='Replied'?'已回复 / Replied':r.replyStatus==='Pending'?'暂未回复 / Pending':'无需回复 / Not Required'}</span></td>
+   <td><span class="tag ${r.replyStatus==='Replied'?'green':r.replyStatus==='Pending'?'orange':''}">${r.replyStatus==='Replied'?'已回复 / Replied':r.replyStatus==='Pending'?'暂未回复 / Pending':'无需回复'}</span></td>
    <td>${esc(formatDate(r.replyDate))}</td>
-   <td>${esc(r.replyRefNo||'—')}</td>
-   <td>
+   <td title="${esc(r.replyRefNo||'—')}">${esc(r.replyRefNo||'—')}</td>
+   <td style="text-align:center;">
      <div class="dropdown">
        <button type="button" class="small secondary">操作 ▼</button>
        <div class="dropdown-content">
@@ -307,6 +371,37 @@ function render(){
      </div>
    </td>
  </tr>`).join(''):'<tr><td colspan="14" class="empty">没有符合条件的记录 / No matching records</td></tr>';
+}
+
+// 初始化 Excel 风格的列宽自由拖拽调整功能
+function initTableResizer() {
+  const table = $('mainTable');
+  const cols = table.querySelectorAll('th');
+  cols.forEach((th) => {
+    const resizer = th.querySelector('.resizer');
+    if (!resizer) return;
+    let x = 0, w = 0;
+    resizer.addEventListener('mousedown', function(e) {
+      x = e.clientX;
+      w = th.offsetWidth;
+      th.classList.add('resizing');
+      
+      const mouseMoveHandler = function(e) {
+        const dx = e.clientX - x;
+        th.style.width = Math.max(70, w + dx) + 'px';
+      };
+      
+      const mouseUpHandler = function() {
+        th.classList.remove('resizing');
+        document.removeEventListener('mousemove', mouseMoveHandler);
+        document.removeEventListener('mouseup', mouseUpHandler);
+      };
+      
+      document.addEventListener('mousemove', mouseMoveHandler);
+      document.addEventListener('mouseup', mouseUpHandler);
+      e.stopPropagation();
+    });
+  });
 }
 
 $('letterForm').addEventListener('submit',async e=>{
@@ -332,6 +427,7 @@ $('backupBtn').onclick=()=>download(new Blob([JSON.stringify({data,options},null
 function download(blob,name){const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
 
 renderOptions();replyControls();loadFromCloud();
+initTableResizer();
 </script>
 </body>
 </html>
