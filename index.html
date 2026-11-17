@@ -15,11 +15,24 @@ main{max-width:1450px;margin:22px auto;padding:0 18px}
 .panel{padding:18px;margin-bottom:16px}.panel h2{font-size:17px;margin:0 0 15px}.grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}
 label{display:block;font-size:12px;color:#475569;margin-bottom:5px}input,select,textarea{width:100%;padding:9px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;font:inherit;font-size:13px}textarea{min-height:68px;resize:vertical}.wide{grid-column:span 2}
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:6px;padding:9px 14px;background:var(--blue);color:white;cursor:pointer;font-size:13px}button:disabled{opacity:0.6;cursor:not-allowed}button.secondary{background:#e8eef5;color:#24364b}button.danger{background:#b42318}button.small{padding:5px 8px;font-size:11px}
-.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;align-items:end;margin-bottom:12px}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:8px}table{width:100%;border-collapse:collapse;min-width:1400px;background:white}th,td{padding:10px 9px;text-align:left;border-bottom:1px solid #e8edf2;font-size:12px;vertical-align:top}th{background:#f7f9fc;color:#475569;position:sticky;top:0}.tag{display:inline-block;border-radius:20px;padding:3px 8px;background:#eaf1ff;color:#2454a6;font-size:11px}.tag.green{background:#e7f7ed;color:#187443}.tag.orange{background:#fff2d9;color:#8a5a00}.empty{text-align:center;color:var(--muted);padding:28px}
-.ref-helper{background:#f8fafc;border:1px dashed #cbd5e1;padding:10px 14px;border-radius:8px;margin-bottom:14px;font-size:12px;color:#334155}
-.ref-helper b{color:var(--navy)}
+.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;align-items:end;margin-bottom:12px}
+
+/* 可自由调整列宽的表格设计 */
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:8px;max-height:650px}
+table{width:100%;border-collapse:collapse;min-width:1400px;background:white;table-layout:auto;}
+th,td{padding:10px 9px;text-align:left;border-bottom:1px solid #e8edf2;border-right:1px solid #f1f5f9;font-size:12px;vertical-align:top;overflow:hidden;text-overflow:ellipsis;resize:horizontal;}
+th{background:#f7f9fc;color:#475569;position:sticky;top:0;z-index:2}
+
+.tag{display:inline-block;border-radius:20px;padding:3px 8px;background:#eaf1ff;color:#2454a6;font-size:11px}.tag.green{background:#e7f7ed;color:#187443}.tag.orange{background:#fff2d9;color:#8a5a00}.empty{text-align:center;color:var(--muted);padding:28px}
 .settings-header{display:flex;justify-content:space-between;align-items:center;cursor:pointer}
 .settings-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.setting-box{border:1px solid var(--line);border-radius:8px;padding:12px}.setting-box h3{font-size:13px;margin:0 0 8px}.setting-box ul{list-style:none;padding:0;margin:8px 0}.setting-box li{display:flex;justify-content:space-between;align-items:center;gap:6px;border-bottom:1px solid #edf1f5;padding:6px 0;font-size:12px}.addline{display:flex;gap:6px}.addline input{min-width:0}
+
+/* 下拉操作菜单样式 */
+.dropdown{position:relative;display:inline-block;}
+.dropdown-content{display:none;position:absolute;right:0;background-color:#fff;min-width:90px;box-shadow:0px 8px 16px rgba(0,0,0,0.15);z-index:10;border-radius:6px;border:1px solid var(--line);padding:4px;}
+.dropdown-content button{width:100%;text-align:left;margin-bottom:2px;}
+.dropdown:hover .dropdown-content{display:block;}
+
 footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
 @media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}.grid,.settings-grid{grid-template-columns:repeat(1,1fr)}.filters{grid-template-columns:1fr 1fr}.wide{grid-column:span 2}}
 @media(max-width:540px){header{padding:18px}.grid,.settings-grid{grid-template-columns:1fr}.wide{grid-column:span 1}.filters{grid-template-columns:1fr}}
@@ -46,12 +59,6 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
 
   <section class="panel">
     <h2 id="formTitle">信函登记 / Letter Registration</h2>
-    
-    <div class="ref-helper" id="latestRefHelper">
-      <b>💡 各项目最新发函编号速查（用于便捷接号）：</b>
-      <span id="latestRefText" style="color:#64748b;margin-left:8px;">正在计算各项目最新编号...</span>
-    </div>
-
     <form id="letterForm">
       <input type="hidden" id="recordId">
       <div class="grid">
@@ -100,7 +107,20 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
       <button type="button" class="secondary" id="backupBtn">备份全部数据 JSON / Backup JSON</button>
     </div>
     <div class="tablewrap"><table><thead><tr>
-      <th>项目 / Project</th><th>类型 / Type</th><th>编号 / Reference</th><th>日期 / Date</th><th>主题 / Subject</th><th>中文信函主体 / Chinese Subject</th><th>发件单位 / From</th><th>收件单位 / To</th><th>抄送单位 / CC</th><th>是否需回复 / Reply Required</th><th>回复情况 / Reply Status</th><th>回复日期 / Reply Date</th><th>回复信函编号 / Reply Ref No.</th><th>操作 / Actions</th>
+      <th>项目 / Project</th>
+      <th>类型 / Type</th>
+      <th style="cursor:pointer;" onclick="toggleSort('refNo')">编号 / Reference <span id="sortRefIcon">↕</span></th>
+      <th style="cursor:pointer;" onclick="toggleSort('letterDate')">日期 / Date <span id="sortDateIcon">⬇</span></th>
+      <th>主题 / Subject</th>
+      <th>中文信函主体 / Chinese Subject</th>
+      <th>发件单位 / From</th>
+      <th>收件单位 / To</th>
+      <th>抄送单位 / CC</th>
+      <th>是否需回复 / Reply Required</th>
+      <th>回复情况 / Reply Status</th>
+      <th>回复日期 / Reply Date</th>
+      <th>回复信函编号 / Reply Ref No.</th>
+      <th>操作 / Actions</th>
     </tr></thead><tbody id="rows"><tr><td colspan="14" class="empty">正在从云端加载数据 / Loading...</td></tr></tbody></table></div>
     <p id="resultCount" style="color:#64748b;font-size:12px;margin:10px 0 0">显示 0 条记录 / 0 records</p>
   </section>
@@ -109,7 +129,7 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
 <script>
 const API_URL = 'https://script.google.com/macros/s/AKfycbxzzfDWucPzVLYqbAmGdbCWeyTAr4VXRMprrn2qy-sOhdunlNQ1T-PArDIFu8SRuK1FLw/exec';
 
-const OPT_KEY='kaduna_correspondence_options_v5';
+const OPT_KEY='kaduna_correspondence_options_v6';
 const defaults={
  project:['Customs Service Zone B Headquarters','RABAH ROAD (ROAD 9)','KABALA ROAD (ROAD 11)','RIGASA ROAD','KADUNA PROJECT GROUP'],
  type:['Outgoing / 发函','Incoming / 来函']
@@ -119,6 +139,9 @@ try{options=JSON.parse(localStorage.getItem(OPT_KEY)||'null')||defaults}catch(e)
 Object.keys(defaults).forEach(k=>{if(!Array.isArray(options[k]))options[k]=defaults[k].slice()});
 
 let data=[];
+let currentSortField = 'letterDate';
+let currentSortOrder = 'desc'; // 'asc' 正序, 'desc' 倒序
+
 const $=id=>document.getElementById(id), val=id=>$(id).value.trim();
 const fields=['project','type','refNo','letterDate','from','to','subject','chineseSubject','cc','replyRequired','replyStatus','replyDate','replyRefNo','description','remarks'];
 
@@ -143,26 +166,11 @@ async function loadFromCloud(){
     const res = await fetch(API_URL);
     data = await res.json();
     render();
-    updateLatestRefHelper();
     setStatus('🟢 云端已同步 (' + new Date().toLocaleTimeString() + ')');
   }catch(e){
     setStatus('🔴 同步失败，请检查网络');
     console.error(e);
   }
-}
-
-function updateLatestRefHelper(){
-  let helperText = '';
-  options.project.forEach(proj => {
-    const projOuts = data.filter(r => r.project === proj && r.type.toLowerCase().includes('outgoing') && r.refNo);
-    if(projOuts.length > 0) {
-      projOuts.sort((a,b)=>(b.letterDate||'').localeCompare(a.letterDate||''));
-      helperText += `<b>[${esc(proj)}]</b> 最新编号: <span style="color:#2563eb;font-weight:bold;">${esc(projOuts[0].refNo)}</span> &nbsp;&nbsp;`;
-    } else {
-      helperText += `<b>[${esc(proj)}]</b> 最新编号: <span style="color:#94a3b8;">暂无发函</span> &nbsp;&nbsp;`;
-    }
-  });
-  $('latestRefText').innerHTML = helperText;
 }
 
 async function syncToCloud(payload){
@@ -182,7 +190,7 @@ async function syncToCloud(payload){
   }
 }
 
-function saveOptions(){localStorage.setItem(OPT_KEY,JSON.stringify(options));renderOptions();render();updateLatestRefHelper();}
+function saveOptions(){localStorage.setItem(OPT_KEY,JSON.stringify(options));renderOptions();render();}
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fillSelect(id,arr,placeholder='请选择 / Select',selected=''){
  const el=$(id),old=selected||el.value;el.innerHTML=`<option value="">${placeholder}</option>`+arr.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
@@ -228,15 +236,79 @@ $('replyStatus').addEventListener('change',()=>{
   }
 });
 function formObj(){let o={};fields.forEach(k=>o[k]=val(k));if(o.replyRequired==='No'){o.replyStatus='Not Required';o.replyDate='';o.replyRefNo=''}if(o.replyRequired==='Yes'&&o.replyStatus==='Pending'){o.replyDate='';o.replyRefNo=''}return o}
+
+// 清理和简化日期显示（只保留 yyyy-mm-dd 或标准格式）
+function formatDate(dStr){
+  if(!dStr) return '—';
+  try {
+    let d = new Date(dStr);
+    if(!isNaN(d.getTime())){
+      let year = d.getFullYear();
+      let month = String(d.getMonth() + 1).padStart(2, '0');
+      let day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+  }catch(e){}
+  return dStr.split('T')[0]; // 防止带有时区的时间串
+}
+
+// 排序切换函数
+function toggleSort(field){
+  if(currentSortField === field){
+    currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
+  } else {
+    currentSortField = field;
+    currentSortOrder = 'asc';
+  }
+  $('sortRefIcon').textContent = (currentSortField==='refNo') ? (currentSortOrder==='asc'?'⬆':'⬇') : '↕';
+  $('sortDateIcon').textContent = (currentSortField==='letterDate') ? (currentSortOrder==='asc'?'⬆':'⬇') : '↕';
+  render();
+}
+
 function filtered(){
  const q=val('search').toLowerCase(),p=val('filterProject'),t=val('filterType'),rs=val('filterReply');
- return data.filter(r=>(!p||r.project===p)&&(!t||r.type===t)&&(!rs||r.replyStatus===rs)&&(!q||[r.refNo,r.subject,r.chineseSubject,r.cc,r.from,r.to,r.replyRefNo,r.description].join(' ').toLowerCase().includes(q))).sort((a,b)=>(b.letterDate||'').localeCompare(a.letterDate||''));
+ let list = data.filter(r=>(!p||r.project===p)&&(!t||r.type===t)&&(!rs||r.replyStatus===rs)&&(!q||[r.refNo,r.subject,r.chineseSubject,r.cc,r.from,r.to,r.replyRefNo,r.description].join(' ').toLowerCase().includes(q)));
+ 
+ // 应用排序
+ list.sort((a,b)=>{
+   let v1 = a[currentSortField] || '';
+   let v2 = b[currentSortField] || '';
+   let cmp = v1.localeCompare(v2, undefined, {numeric: true, sensitivity: 'base'});
+   return currentSortOrder === 'asc' ? cmp : -cmp;
+ });
+ return list;
 }
+
 function render(){
  $('total').textContent=data.length;$('outgoing').textContent=data.filter(x=>x.type.toLowerCase().includes('outgoing')).length;$('incoming').textContent=data.filter(x=>x.type.toLowerCase().includes('incoming')).length;$('pending').textContent=data.filter(x=>x.replyStatus==='Pending').length;
  const list=filtered();$('resultCount').textContent=`显示 ${list.length} 条记录 / ${list.length} records（共 ${data.length} 条 / total）`;
- $('rows').innerHTML=list.length?list.map(r=>`<tr><td>${esc(r.project)}</td><td><span class="tag">${esc(r.type)}</span></td><td>${esc(r.refNo||'—')}</td><td>${esc(r.letterDate)}</td><td>${esc(r.subject)}</td><td>${esc(r.chineseSubject||'—')}</td><td>${esc(r.from)}</td><td>${esc(r.to)}</td><td>${esc(r.cc||'—')}</td><td>${r.replyRequired==='Yes'?'是 / Yes':'否 / No'}</td><td><span class="tag ${r.replyStatus==='Replied'?'green':r.replyStatus==='Pending'?'orange':''}">${r.replyStatus==='Replied'?'已回复 / Replied':r.replyStatus==='Pending'?'暂未回复 / Pending':'无需回复 / Not Required'}</span></td><td>${esc(r.replyDate||'—')}</td><td>${esc(r.replyRefNo||'—')}</td><td><button type="button" class="small secondary" onclick="editRecord('${r.id}')">编辑 / Edit</button> <button type="button" class="small danger" onclick="deleteRecord('${r.id}')">删除 / Delete</button></td></tr>`).join(''):'<tr><td colspan="14" class="empty">没有符合条件的记录 / No matching records</td></tr>';
+ 
+ $('rows').innerHTML=list.length?list.map(r=>`<tr>
+   <td>${esc(r.project)}</td>
+   <td><span class="tag">${esc(r.type)}</span></td>
+   <td>${esc(r.refNo||'—')}</td>
+   <td>${esc(formatDate(r.letterDate))}</td>
+   <td>${esc(r.subject)}</td>
+   <td>${esc(r.chineseSubject||'—')}</td>
+   <td>${esc(r.from)}</td>
+   <td>${esc(r.to)}</td>
+   <td>${esc(r.cc||'—')}</td>
+   <td>${r.replyRequired==='Yes'?'是 / Yes':'否 / No'}</td>
+   <td><span class="tag ${r.replyStatus==='Replied'?'green':r.replyStatus==='Pending'?'orange':''}">${r.replyStatus==='Replied'?'已回复 / Replied':r.replyStatus==='Pending'?'暂未回复 / Pending':'无需回复 / Not Required'}</span></td>
+   <td>${esc(formatDate(r.replyDate))}</td>
+   <td>${esc(r.replyRefNo||'—')}</td>
+   <td>
+     <div class="dropdown">
+       <button type="button" class="small secondary">操作 ▼</button>
+       <div class="dropdown-content">
+         <button type="button" class="small secondary" onclick="editRecord('${r.id}')">编辑 / Edit</button>
+         <button type="button" class="small danger" onclick="deleteRecord('${r.id}')">删除 / Delete</button>
+       </div>
+     </div>
+   </td>
+ </tr>`).join(''):'<tr><td colspan="14" class="empty">没有符合条件的记录 / No matching records</td></tr>';
 }
+
 $('letterForm').addEventListener('submit',async e=>{
  e.preventDefault();const o=formObj(),id=$('recordId').value;
  if(o.replyRequired==='Yes'&&o.replyStatus==='Replied'&&!o.replyDate){alert('已回复时，请填写回复日期。/ Please enter the reply date for a replied letter.');return}
