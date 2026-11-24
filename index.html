@@ -17,7 +17,6 @@ label{display:block;font-size:12px;color:#475569;margin-bottom:5px}input,select,
 .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:6px;padding:9px 14px;background:var(--blue);color:white;cursor:pointer;font-size:13px}button:disabled{opacity:0.6;cursor:not-allowed}button.secondary{background:#e8eef5;color:#24364b}button.danger{background:#b42318}button.small{padding:5px 10px;font-size:11px}
 .filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;align-items:end;margin-bottom:14px}
 
-/* 表格容器：去除 overflow:hidden 以确保下拉菜单不被裁切 */
 .tablewrap{
   position:relative;
   max-height:540px; 
@@ -83,7 +82,6 @@ th {
 .setting-box li{display:flex;justify-content:space-between;align-items:center;gap:6px;border-bottom:1px solid #edf1f5;padding:6px 0;font-size:12px}
 .addline{display:flex;gap:6px}.addline input{min-width:0}
 
-/* 完美解决被遮挡的操作菜单样式：固定定位或高层级 */
 .action-cell { position: relative; overflow: visible !important; }
 .dropdown{position:relative;display:inline-block;}
 .dropdown-btn{background:#e8eef5;color:#24364b;font-weight:600;}
@@ -124,7 +122,6 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
         <div><label>正式信函编号 / Reference Number</label><input id="refNo" placeholder="按现有编号规则填写 / Enter official reference"></div>
         <div><label>信函日期 / Letter Date *</label><input id="letterDate" type="date" required></div>
         
-        <!-- 带自动联想记忆库的单位输入框 -->
         <div>
           <label>发件单位 / From</label>
           <input id="from" list="fromList" placeholder="例如 CCECC">
@@ -256,7 +253,6 @@ async function loadFromCloud(){
   }
 }
 
-// 自动提取历史数据中的所有单位，填充到自动补全列表中
 function updateUnitDatalists(){
   let froms = new Set(), tos = new Set(), ccs = new Set();
   data.forEach(r => {
@@ -335,18 +331,37 @@ $('replyStatus').addEventListener('change',()=>{
 });
 function formObj(){let o={};fields.forEach(k=>o[k]=val(k));if(o.replyRequired==='No'){o.replyStatus='Not Required';o.replyDate='';o.replyRefNo=''}if(o.replyRequired==='Yes'&&o.replyStatus==='Pending'){o.replyDate='';o.replyRefNo=''}return o}
 
+// 解析日期为时间戳，支持多种常见日期格式
+function parseDateToTs(dStr){
+  if(!dStr) return null;
+  const s = String(dStr).trim();
+  const isoMatch = s.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})/);
+  if(isoMatch){
+    const dt = new Date(Number(isoMatch[1]), Number(isoMatch[2]) - 1, Number(isoMatch[3]));
+    return isNaN(dt.getTime()) ? null : dt.getTime();
+  }
+  const parsed = Date.parse(s);
+  if(!isNaN(parsed)){
+    const dt = new Date(parsed);
+    return new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime();
+  }
+  return null;
+}
+
+// 转为 <input type="date"> 所需的 YYYY-MM-DD 格式
+function toInputDate(dStr){
+  const ts = parseDateToTs(dStr);
+  if(ts === null) return '';
+  const dt = new Date(ts);
+  const year = dt.getFullYear();
+  const month = String(dt.getMonth() + 1).padStart(2, '0');
+  const day = String(dt.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 function formatDate(dStr){
-  if(!dStr) return '—';
-  try {
-    let d = new Date(dStr);
-    if(!isNaN(d.getTime())){
-      let year = d.getFullYear();
-      let month = String(d.getMonth() + 1).padStart(2, '0');
-      let day = String(d.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    }
-  }catch(e){}
-  return dStr.split('T')[0];
+  const iso = toInputDate(dStr);
+  return iso || (dStr ? String(dStr).split('T')[0] : '—');
 }
 
 function toggleSort(field){
@@ -366,6 +381,14 @@ function filtered(){
  let list = data.filter(r=>(!p||r.project===p)&&(!t||r.type===t)&&(!rs||r.replyStatus===rs)&&(!q||[r.refNo,r.subject,r.chineseSubject,r.cc,r.from,r.to,r.replyRefNo,r.description].join(' ').toLowerCase().includes(q)));
  
  list.sort((a,b)=>{
+   if(currentSortField === 'letterDate' || currentSortField === 'replyDate'){
+     const t1 = parseDateToTs(a[currentSortField]);
+     const t2 = parseDateToTs(b[currentSortField]);
+     if(t1 === null && t2 === null) return 0;
+     if(t1 === null) return 1;
+     if(t2 === null) return -1;
+     return currentSortOrder === 'asc' ? (t1 - t2) : (t2 - t1);
+   }
    let v1 = a[currentSortField] || '';
    let v2 = b[currentSortField] || '';
    let cmp = v1.localeCompare(v2, undefined, {numeric: true, sensitivity: 'base'});
@@ -434,7 +457,6 @@ function initTableResizer() {
   });
 }
 
-// 提交表单逻辑（加入编号重复检测与二次确认提示）
 $('letterForm').addEventListener('submit',async e=>{
  e.preventDefault();
  const o=formObj(), id=$('recordId').value;
@@ -444,7 +466,6 @@ $('letterForm').addEventListener('submit',async e=>{
    return;
  }
  
- // 编号重复检查与提醒
  if(o.refNo){
    const duplicate = data.find(r => r.refNo.toLowerCase() === o.refNo.toLowerCase() && r.id !== id);
    if(duplicate){
@@ -454,7 +475,7 @@ $('letterForm').addEventListener('submit',async e=>{
                         `• 原中文主体：${duplicate.chineseSubject || '无'}\n\n` +
                         `请对比确认是否为同一封信。如果确认无误需要录入，请点击“确定”继续提交；如果发现录入错误，请点击“取消”返回修改。`;
      if(!confirm(confirmMsg)){
-       return; // 用户点击取消，中断提交，返回编辑修改
+       return;
      }
    }
  }
@@ -469,10 +490,16 @@ window.editRecord=id=>{
   const r=data.find(x=>x.id===id);
   if(!r)return;
   $('recordId').value=id;
-  fields.forEach(k=>$(k).value=r[k]||'');
+  fields.forEach(k=>{
+    if(k === 'letterDate' || k === 'replyDate'){
+      $(k).value = toInputDate(r[k]||'');
+    } else {
+      $(k).value = r[k]||'';
+    }
+  });
   replyControls();
   $('replyStatus').value=r.replyStatus||'';
-  $('replyDate').value=r.replyDate||'';
+  $('replyDate').value=toInputDate(r.replyDate||'');
   $('replyRefNo').value=r.replyRefNo||'';
   if(r.replyStatus==='Replied'){$('replyRefNo').disabled=false;}
   $('formTitle').textContent='信函修改 / Edit Correspondence';
