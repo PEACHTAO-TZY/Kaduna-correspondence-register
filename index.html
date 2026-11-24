@@ -7,15 +7,26 @@
 <style>
 :root{--navy:#17324d;--blue:#2563eb;--bg:#f3f6fa;--line:#cbd5e1;--muted:#64748b}
 *{box-sizing:border-box}body{margin:0;font-family:Arial,"Microsoft YaHei",sans-serif;background:var(--bg);color:#172033}
-header{background:var(--navy);color:white;padding:22px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+header{background:var(--navy);color:white;padding:20px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
 header h1{margin:0 0 6px;font-size:22px}header p{margin:0;color:#d5e1ee;font-size:13px}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .sync-badge{background:rgba(255,255,255,0.15);padding:6px 12px;border-radius:20px;font-size:12px;display:flex;align-items:center;gap:8px}
 main{max-width:1550px;margin:22px auto;padding:0 18px}
 .cards{display:grid;grid-template-columns:repeat(4,minmax(130px,1fr));gap:12px;margin-bottom:16px}.card,.panel{background:white;border:1px solid var(--line);border-radius:10px}.card{padding:15px}.card small{color:var(--muted)}.num{font-size:27px;font-weight:700;margin-top:6px}
 .panel{padding:18px;margin-bottom:16px}.panel h2{font-size:17px;margin:0 0 15px}.grid{display:grid;grid-template-columns:repeat(4,minmax(150px,1fr));gap:12px}
 label{display:block;font-size:12px;color:#475569;margin-bottom:5px}input,select,textarea{width:100%;padding:9px 10px;border:1px solid #cbd5e1;border-radius:6px;background:white;font:inherit;font-size:13px}textarea{min-height:68px;resize:vertical}.wide{grid-column:span 2}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:6px;padding:9px 14px;background:var(--blue);color:white;cursor:pointer;font-size:13px}button:disabled{opacity:0.6;cursor:not-allowed}button.secondary{background:#e8eef5;color:#24364b}button.danger{background:#b42318}button.small{padding:5px 10px;font-size:11px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}button{border:0;border-radius:6px;padding:9px 14px;background:var(--blue);color:white;cursor:pointer;font-size:13px}button:disabled{opacity:0.6;cursor:not-allowed}button.secondary{background:#e8eef5;color:#24364b}button.danger{background:#b42318}button.success{background:#16a34a;color:white}button.small{padding:6px 11px;font-size:12px}
 .filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:9px;align-items:end;margin-bottom:14px}
+
+.ref-lookup{margin-top:6px;padding:8px 10px;background:#f8fafc;border:1px dashed #94a3b8;border-radius:6px;font-size:11px;line-height:1.55;color:#334155}
+.ref-lookup b{color:var(--navy)}
+.ref-chip{display:inline-block;background:#e0e7ff;color:#1e40af;padding:1px 6px;border-radius:4px;margin:2px 4px 2px 0;cursor:pointer;font-family:Consolas,monospace}
+.ref-chip:hover{background:#c7d2fe}
+
+.col-picker{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;margin-bottom:12px}
+.col-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+.col-item{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#334155;background:white;border:1px solid #cbd5e1;padding:4px 9px;border-radius:6px;cursor:pointer;user-select:none}
+.col-item input{width:auto;margin:0;cursor:pointer}
 
 .tablewrap{
   position:relative;
@@ -29,13 +40,13 @@ label{display:block;font-size:12px;color:#475569;margin-bottom:5px}input,select,
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:1600px;
+  min-width:1200px;
   table-layout:fixed;
   background:white;
 }
 
 th, td{
-  padding:11px 10px;
+  padding:10px 10px;
   text-align:left;
   border-bottom:1px solid #e2e8f0;
   border-right:1px solid #edf2f7;
@@ -69,6 +80,29 @@ th {
   background: var(--blue);
 }
 
+.editable-cn{
+  cursor:pointer;
+  border-radius:4px;
+  padding:2px 5px;
+  display:inline-block;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  background:#f0fdf4;
+  border:1px dashed #86efac;
+}
+.editable-cn:hover{
+  background:#dcfce7;
+}
+.inline-input{
+  width:100%;
+  padding:4px 6px;
+  font-size:12px;
+  border:1px solid var(--blue);
+  border-radius:4px;
+  background:#fff;
+}
+
 .tag{display:inline-block;border-radius:20px;padding:3px 9px;background:#eef2ff;color:#3730a3;font-size:11px;font-weight:500}
 .tag.green{background:#f0fdf4;color:#166534}
 .tag.orange{background:#fffbeb;color:#92400e}
@@ -99,9 +133,12 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
     <h1>卡杜纳州项目群信函登记系统</h1>
     <p>Correspondence Register | 云端多人协同版 · Bilingual Interface</p>
   </div>
-  <div class="sync-badge">
-    <span id="syncStatus">🟡 正在连接云端...</span>
-    <button type="button" class="small secondary" onclick="loadFromCloud()">刷新同步 / Sync</button>
+  <div class="header-right">
+    <button type="button" id="quickEditAuthBtn" class="small secondary" onclick="toggleQuickEditAuth()">🔒 快捷修改（未解锁）</button>
+    <div class="sync-badge">
+      <span id="syncStatus">🟡 正在连接云端...</span>
+      <button type="button" class="small secondary" onclick="loadFromCloud()">刷新同步 / Sync</button>
+    </div>
   </div>
 </header>
 <main>
@@ -119,7 +156,11 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
       <div class="grid">
         <div><label>项目名称 / Project Name *</label><select id="project" required></select></div>
         <div><label>信函类型 / Correspondence Type *</label><select id="type" required></select></div>
-        <div><label>正式信函编号 / Reference Number</label><input id="refNo" placeholder="按现有编号规则填写 / Enter official reference"></div>
+        <div class="wide">
+          <label>正式信函编号 / Reference Number</label>
+          <input id="refNo" placeholder="例如 CCECC/ARCHIMODE/CUSTOMS/230922-013">
+          <div class="ref-lookup" id="refLookupBox">输入编号前缀（如 <b>CCECC/ARCH</b>）查看最新编号与建议下一号...</div>
+        </div>
         <div><label>信函日期 / Letter Date *</label><input id="letterDate" type="date" required></div>
         
         <div>
@@ -163,7 +204,22 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
   </section>
 
   <section class="panel">
-    <h2>信函查询与导出 / Search & Export</h2>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+      <h2 style="margin:0;">信函查询与导出 / Search & Export</h2>
+      <button type="button" class="small secondary" onclick="toggleColPicker()">自定义显示栏目 / Columns ▼</button>
+    </div>
+
+    <div class="col-picker" id="colPickerBox" style="display:none;">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;">
+        <span style="font-size:12px;font-weight:600;color:#334155;">勾选你想在表格中显示的栏目：</span>
+        <div style="display:flex;gap:6px;">
+          <button type="button" class="small secondary" onclick="setAllCols(true)">全选</button>
+          <button type="button" class="small secondary" onclick="resetDefaultCols()">恢复默认</button>
+        </div>
+      </div>
+      <div class="col-list" id="colCheckboxes"></div>
+    </div>
+
     <div class="filters">
       <div><label>关键词 / Keyword</label><input id="search" placeholder="编号,主题,抄送,收发单位... / Ref, subject, cc..."></div>
       <div><label>项目 / Project</label><select id="filterProject"><option value="">全部项目 / All</option></select></div>
@@ -178,26 +234,9 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
     
     <div class="tablewrap" id="tableContainer">
       <table id="mainTable">
-        <thead>
-          <tr>
-            <th style="width:200px;">项目 / Project<div class="resizer"></div></th>
-            <th style="width:120px;">类型 / Type<div class="resizer"></div></th>
-            <th style="width:160px; cursor:pointer;" onclick="toggleSort('refNo')">编号 / Reference <span id="sortRefIcon">↕</span><div class="resizer"></div></th>
-            <th style="width:110px; cursor:pointer;" onclick="toggleSort('letterDate')">日期 / Date <span id="sortDateIcon">⬇</span><div class="resizer"></div></th>
-            <th style="width:220px;">主题 / Subject<div class="resizer"></div></th>
-            <th style="width:180px;">中文信函主体 / Chinese Subject<div class="resizer"></div></th>
-            <th style="width:130px;">发件单位 / From<div class="resizer"></div></th>
-            <th style="width:130px;">收件单位 / To<div class="resizer"></div></th>
-            <th style="width:150px;">抄送单位 / CC<div class="resizer"></div></th>
-            <th style="width:110px;">是否需回复<div class="resizer"></div></th>
-            <th style="width:120px;">回复情况 / Status<div class="resizer"></div></th>
-            <th style="width:110px;">回复日期<div class="resizer"></div></th>
-            <th style="width:140px;">回复编号<div class="resizer"></div></th>
-            <th style="width:100px; text-align:center;">操作</th>
-          </tr>
-        </thead>
+        <thead id="tableHead"></thead>
         <tbody id="rows">
-          <tr><td colspan="14" class="empty">正在从云端加载数据 / Loading...</td></tr>
+          <tr><td class="empty">正在从云端加载数据 / Loading...</td></tr>
         </tbody>
       </table>
     </div>
@@ -206,23 +245,90 @@ footer{color:var(--muted);font-size:12px;text-align:center;padding:8px 0 28px}
   <footer>云端协同版 · Google Sheets Backend · CSV Export</footer>
 </main>
 <script>
-const API_URL = 'https://script.google.com/macros/s/AKfycbxzzfDWucPzVLYqbAmGdbCWeyTAr4VXRMprrn2qy-sOhdunlNQ1T-PArDIFu8SRuK1FLw/exec';
+// ★★★ 请在此处填入你的 Google Apps Script Web 应用网址 ★★★
+const API_URL = '请替换成你的_GOOGLE_APPS_SCRIPT_网址';
 
-const OPT_KEY='kaduna_correspondence_options_v8';
+const QUICK_EDIT_PWD = '124578';
+const OPT_KEY='kaduna_correspondence_options_v10';
+const COL_KEY='kaduna_correspondence_visible_cols_v1';
+
 const defaults={
  project:['Customs Service Zone B Headquarters','RABAH ROAD (ROAD 9)','KABALA ROAD (ROAD 11)','RIGASA ROAD','KADUNA PROJECT GROUP'],
  type:['Outgoing / 发函','Incoming / 来函']
 };
+
+const ALL_COLUMNS = [
+  { key: 'project', label: '项目 / Project', width: 200, defaultVisible: true },
+  { key: 'type', label: '类型 / Type', width: 120, defaultVisible: true },
+  { key: 'refNo', label: '编号 / Reference', width: 190, defaultVisible: true, sortField: 'refNo' },
+  { key: 'letterDate', label: '日期 / Date', width: 115, defaultVisible: true, sortField: 'letterDate' },
+  { key: 'subject', label: '主题 / Subject', width: 230, defaultVisible: true },
+  { key: 'chineseSubject', label: '中文信函主体 / Chinese Subject', width: 200, defaultVisible: true, inlineCn: true },
+  { key: 'from', label: '发件单位 / From', width: 130, defaultVisible: true },
+  { key: 'to', label: '收件单位 / To', width: 130, defaultVisible: true },
+  { key: 'cc', label: '抄送单位 / CC', width: 150, defaultVisible: true },
+  { key: 'replyRequired', label: '是否需回复', width: 110, defaultVisible: true },
+  { key: 'replyStatus', label: '回复情况 / Status', width: 125, defaultVisible: true },
+  { key: 'replyDate', label: '回复日期', width: 115, defaultVisible: false },
+  { key: 'replyRefNo', label: '回复编号', width: 145, defaultVisible: false },
+  { key: 'description', label: '内容摘要', width: 220, defaultVisible: false },
+  { key: 'remarks', label: '备注', width: 180, defaultVisible: false },
+  { key: 'actions', label: '操作', width: 100, defaultVisible: true, isAction: true }
+];
+
 let options;
 try{options=JSON.parse(localStorage.getItem(OPT_KEY)||'null')||defaults}catch(e){options=defaults}
 Object.keys(defaults).forEach(k=>{if(!Array.isArray(options[k]))options[k]=defaults[k].slice()});
 
+let visibleCols;
+try{
+  const saved = JSON.parse(localStorage.getItem(COL_KEY)||'null');
+  visibleCols = Array.isArray(saved) && saved.length ? saved : ALL_COLUMNS.filter(c=>c.defaultVisible).map(c=>c.key);
+}catch(e){
+  visibleCols = ALL_COLUMNS.filter(c=>c.defaultVisible).map(c=>c.key);
+}
+if(!visibleCols.includes('actions')) visibleCols.push('actions');
+
 let data=[];
 let currentSortField = 'letterDate';
 let currentSortOrder = 'desc';
+let quickEditUnlocked = false;
+let editingInlineId = null;
 
 const $=id=>document.getElementById(id), val=id=>$(id).value.trim();
 const fields=['project','type','refNo','letterDate','from','to','subject','chineseSubject','cc','replyRequired','replyStatus','replyDate','replyRefNo','description','remarks'];
+
+// 快捷修改权限开关（密码：124578）
+window.toggleQuickEditAuth = function(){
+  if(quickEditUnlocked){
+    quickEditUnlocked = false;
+    editingInlineId = null;
+    updateQuickEditBtn();
+    render();
+    return;
+  }
+  const pwd = prompt('请输入快捷修改密码以解锁行内修改“中文信函主体”：');
+  if(pwd === null) return;
+  if(pwd === QUICK_EDIT_PWD){
+    quickEditUnlocked = true;
+    updateQuickEditBtn();
+    render();
+    alert('解锁成功！现在可以直接点击表格里的“中文信函主体”进行修改（回车保存）。');
+  } else {
+    alert('密码错误，无法解锁！');
+  }
+};
+
+function updateQuickEditBtn(){
+  const btn = $('quickEditAuthBtn');
+  if(quickEditUnlocked){
+    btn.textContent = '🔓 快捷修改已解锁（点击锁定）';
+    btn.className = 'small success';
+  } else {
+    btn.textContent = '🔒 快捷修改（未解锁）';
+    btn.className = 'small secondary';
+  }
+}
 
 function toggleSettings(){
   const body = $('settingsBody');
@@ -236,6 +342,71 @@ function toggleSettings(){
   }
 }
 
+function toggleColPicker(){
+  const box = $('colPickerBox');
+  box.style.display = box.style.display === 'none' ? 'block' : 'none';
+}
+
+function renderColPicker(){
+  $('colCheckboxes').innerHTML = ALL_COLUMNS.filter(c=>!c.isAction).map(c=>{
+    const checked = visibleCols.includes(c.key) ? 'checked' : '';
+    return `<label class="col-item"><input type="checkbox" ${checked} onchange="toggleColumn('${c.key}', this.checked)">${esc(c.label)}</label>`;
+  }).join('');
+}
+
+window.toggleColumn = function(key, isChecked){
+  if(isChecked){
+    if(!visibleCols.includes(key)) visibleCols.push(key);
+  } else {
+    visibleCols = visibleCols.filter(k=>k!==key);
+  }
+  localStorage.setItem(COL_KEY, JSON.stringify(visibleCols));
+  renderTableHead();
+  render();
+};
+
+window.setAllCols = function(all){
+  visibleCols = all ? ALL_COLUMNS.map(c=>c.key) : ['project','refNo','letterDate','subject','chineseSubject','actions'];
+  localStorage.setItem(COL_KEY, JSON.stringify(visibleCols));
+  renderColPicker();
+  renderTableHead();
+  render();
+};
+
+window.resetDefaultCols = function(){
+  visibleCols = ALL_COLUMNS.filter(c=>c.defaultVisible).map(c=>c.key);
+  localStorage.setItem(COL_KEY, JSON.stringify(visibleCols));
+  renderColPicker();
+  renderTableHead();
+  render();
+};
+
+function getActiveColumns(){
+  return ALL_COLUMNS.filter(c => visibleCols.includes(c.key));
+}
+
+function renderTableHead(){
+  const cols = getActiveColumns();
+  const totalW = cols.reduce((sum, c)=> sum + c.width, 0);
+  $('mainTable').style.minWidth = Math.max(900, totalW) + 'px';
+
+  $('tableHead').innerHTML = '<tr>' + cols.map(c=>{
+    let sortHtml = '';
+    if(c.sortField){
+      let icon = '↕';
+      if(currentSortField === c.sortField) icon = currentSortOrder === 'asc' ? '⬆' : '⬇';
+      sortHtml = ` <span style="color:var(--blue)">${icon}</span>`;
+    }
+    const clickAttr = c.sortField ? `style="width:${c.width}px;cursor:pointer;" onclick="toggleSort('${c.sortField}')"` :
+                      c.isAction ? `style="width:${c.width}px;text-align:center;"` :
+                      `style="width:${c.width}px;"`;
+    const resizerHtml = c.isAction ? '' : '<div class="resizer"></div>';
+    return `<th data-key="${c.key}" ${clickAttr}>${esc(c.label)}${sortHtml}${resizerHtml}</th>`;
+  }).join('') + '</tr>';
+
+  initTableResizer();
+}
+
 function setStatus(text){$('syncStatus').textContent=text;}
 
 async function loadFromCloud(){
@@ -246,6 +417,7 @@ async function loadFromCloud(){
     data = await res.json();
     render();
     updateUnitDatalists();
+    updateRefLookup();
     setStatus('🟢 云端已同步 (' + new Date().toLocaleTimeString() + ')');
   }catch(e){
     setStatus('🔴 同步失败，请检查网络');
@@ -266,6 +438,57 @@ function updateUnitDatalists(){
   $('toList').innerHTML = Array.from(tos).map(x=>`<option value="${esc(x)}">`).join('');
   $('ccList').innerHTML = Array.from(ccs).map(x=>`<option value="${esc(x)}">`).join('');
 }
+
+function updateRefLookup(){
+  const inputRef = val('refNo');
+  const box = $('refLookupBox');
+  if(!inputRef){
+    box.innerHTML = '输入编号前缀（如 <b>CCECC/ARCH</b>）查看最新编号与建议下一号...';
+    return;
+  }
+
+  const upperInput = inputRef.toUpperCase();
+  const exactMatches = data.filter(r => (r.refNo||'').trim().toUpperCase() === upperInput);
+  const prefixMatches = data.filter(r => (r.refNo||'').trim().toUpperCase().startsWith(upperInput));
+
+  prefixMatches.sort((a,b)=>{
+    const cmpRef = (b.refNo||'').localeCompare(a.refNo||'', undefined, {numeric:true, sensitivity:'base'});
+    if(cmpRef !== 0) return cmpRef;
+    return (parseDateToTs(b.letterDate)||0) - (parseDateToTs(a.letterDate)||0);
+  });
+
+  let html = '';
+  if(exactMatches.length > 0){
+    html += `<div style="color:#b42318;font-weight:600;margin-bottom:4px;">⚠️ 库中已存在完全相同的编号：${esc(exactMatches[0].refNo)}（主题：${esc(exactMatches[0].subject||'—')}）</div>`;
+  }
+
+  if(prefixMatches.length > 0){
+    const top5 = prefixMatches.slice(0, 5);
+    let suggestionHtml = '';
+    const lastMatch = top5[0].refNo.trim().match(/^(.*?)(\d+)$/);
+    if(lastMatch){
+      const prefixPart = lastMatch[1];
+      const numStr = lastMatch[2];
+      const nextNum = String(Number(numStr) + 1).padStart(numStr.length, '0');
+      const suggested = prefixPart + nextNum;
+      suggestionHtml = ` · 建议下一号：<span class="ref-chip" title="点击填入建议编号" onclick="applySuggestedRef('${esc(suggested)}')">${esc(suggested)}</span>`;
+    }
+
+    html += `<div><b>匹配“${esc(inputRef)}”的最新编号</b>${suggestionHtml}：</div>`;
+    html += '<div>' + top5.map(r=>
+      `<span class="ref-chip" title="${esc(r.subject||'')} (${esc(formatDate(r.letterDate))})" onclick="applySuggestedRef('${esc(r.refNo)}')">${esc(r.refNo)} <span style="color:#64748b">(${esc(formatDate(r.letterDate))})</span></span>`
+    ).join('') + '</div>';
+  } else {
+    html += `<div>未找到以“<b>${esc(inputRef)}</b>”开头的历史编号（可能是新前缀/新批次）。</div>`;
+  }
+
+  box.innerHTML = html;
+}
+
+window.applySuggestedRef = function(refVal){
+  $('refNo').value = refVal;
+  updateRefLookup();
+};
 
 async function syncToCloud(payload){
   setStatus('🟡 正在保存到云端...');
@@ -302,7 +525,7 @@ window.addOption=key=>{const v=$('new_'+key).value.trim();if(!v)return;if(option
 window.editOption=(key,i)=>{const old=options[key][i],v=prompt('编辑选项 / Edit option:',old);if(v===null)return;const n=v.trim();if(!n)return;if(options[key].some((x,j)=>j!==i&&x===n)){alert('该选项已存在 / Duplicate option');return}options[key][i]=n;saveOptions()};
 window.removeOption=(key,i)=>{if(!confirm('确定删除该选项？ / Delete this option?'))return;options[key].splice(i,1);saveOptions()};
 
-function resetForm(){$('letterForm').reset();$('recordId').value='';$('formTitle').textContent='信函登记 / Letter Registration';$('saveBtn').textContent='保存并同步云端 / Save & Sync';replyControls()}
+function resetForm(){$('letterForm').reset();$('recordId').value='';$('formTitle').textContent='信函登记 / Letter Registration';$('saveBtn').textContent='保存并同步云端 / Save & Sync';replyControls();updateRefLookup();}
 function replyControls(){
  const required=val('replyRequired'),status=$('replyStatus'),date=$('replyDate'),refNo=$('replyRefNo');
  status.innerHTML='';
@@ -331,7 +554,6 @@ $('replyStatus').addEventListener('change',()=>{
 });
 function formObj(){let o={};fields.forEach(k=>o[k]=val(k));if(o.replyRequired==='No'){o.replyStatus='Not Required';o.replyDate='';o.replyRefNo=''}if(o.replyRequired==='Yes'&&o.replyStatus==='Pending'){o.replyDate='';o.replyRefNo=''}return o}
 
-// 解析日期为时间戳，支持多种常见日期格式
 function parseDateToTs(dStr){
   if(!dStr) return null;
   const s = String(dStr).trim();
@@ -348,7 +570,6 @@ function parseDateToTs(dStr){
   return null;
 }
 
-// 转为 <input type="date"> 所需的 YYYY-MM-DD 格式
 function toInputDate(dStr){
   const ts = parseDateToTs(dStr);
   if(ts === null) return '';
@@ -364,21 +585,20 @@ function formatDate(dStr){
   return iso || (dStr ? String(dStr).split('T')[0] : '—');
 }
 
-function toggleSort(field){
+window.toggleSort = function(field){
   if(currentSortField === field){
     currentSortOrder = currentSortOrder === 'asc' ? 'desc' : 'asc';
   } else {
     currentSortField = field;
     currentSortOrder = 'asc';
   }
-  $('sortRefIcon').textContent = (currentSortField==='refNo') ? (currentSortOrder==='asc'?'⬆':'⬇') : '↕';
-  $('sortDateIcon').textContent = (currentSortField==='letterDate') ? (currentSortOrder==='asc'?'⬆':'⬇') : '↕';
+  renderTableHead();
   render();
-}
+};
 
 function filtered(){
  const q=val('search').toLowerCase(),p=val('filterProject'),t=val('filterType'),rs=val('filterReply');
- let list = data.filter(r=>(!p||r.project===p)&&(!t||r.type===t)&&(!rs||r.replyStatus===rs)&&(!q||[r.refNo,r.subject,r.chineseSubject,r.cc,r.from,r.to,r.replyRefNo,r.description].join(' ').toLowerCase().includes(q)));
+ let list = data.filter(r=>(!p||r.project===p)&&(!t||r.type===t)&&(!rs||r.replyStatus===rs)&&(!q||[r.refNo,r.subject,r.chineseSubject,r.cc,r.from,r.to,r.replyRefNo,r.description,r.remarks].join(' ').toLowerCase().includes(q)));
  
  list.sort((a,b)=>{
    if(currentSortField === 'letterDate' || currentSortField === 'replyDate'){
@@ -397,34 +617,100 @@ function filtered(){
  return list;
 }
 
+window.startInlineCnEdit = function(id){
+  if(!quickEditUnlocked) return;
+  editingInlineId = id;
+  render();
+  const inp = $('inlineCnInput_' + id);
+  if(inp){
+    inp.focus();
+    inp.select();
+  }
+};
+
+window.commitInlineCnEdit = async function(id, cancel=false){
+  if(editingInlineId !== id) return;
+  const inp = $('inlineCnInput_' + id);
+  const newVal = inp ? inp.value.trim() : '';
+  editingInlineId = null;
+  if(cancel){
+    render();
+    return;
+  }
+  const rowObj = data.find(x => String(x.id) === String(id));
+  if(!rowObj || rowObj.chineseSubject === newVal){
+    render();
+    return;
+  }
+  const updated = { ...rowObj, chineseSubject: newVal };
+  await syncToCloud({ action: 'save', data: updated });
+};
+
+function renderCell(r, col){
+  switch(col.key){
+    case 'project':
+      return `<td title="${esc(r.project)}">${esc(r.project)}</td>`;
+    case 'type':
+      return `<td><span class="tag">${esc(r.type)}</span></td>`;
+    case 'refNo':
+      return `<td title="${esc(r.refNo||'—')}">${esc(r.refNo||'—')}</td>`;
+    case 'letterDate':
+      return `<td>${esc(formatDate(r.letterDate))}</td>`;
+    case 'subject':
+      return `<td title="${esc(r.subject)}">${esc(r.subject)}</td>`;
+    case 'chineseSubject':
+      if(!quickEditUnlocked){
+        return `<td title="${esc(r.chineseSubject||'—')}">${esc(r.chineseSubject||'—')}</td>`;
+      }
+      if(String(editingInlineId) === String(r.id)){
+        return `<td><input id="inlineCnInput_${r.id}" class="inline-input" value="${esc(r.chineseSubject||'')}" onkeydown="if(event.key==='Enter'){commitInlineCnEdit('${r.id}',false)}else if(event.key==='Escape'){commitInlineCnEdit('${r.id}',true)}" onblur="commitInlineCnEdit('${r.id}',false)"></td>`;
+      }
+      return `<td title="点击直接修改中文信函主体 / Click to edit"><span class="editable-cn" onclick="startInlineCnEdit('${r.id}')">${esc(r.chineseSubject||'—')}</span></td>`;
+    case 'from':
+      return `<td title="${esc(r.from)}">${esc(r.from||'—')}</td>`;
+    case 'to':
+      return `<td title="${esc(r.to)}">${esc(r.to||'—')}</td>`;
+    case 'cc':
+      return `<td title="${esc(r.cc||'—')}">${esc(r.cc||'—')}</td>`;
+    case 'replyRequired':
+      return `<td>${r.replyRequired==='Yes'?'是 / Yes':'否 / No'}</td>`;
+    case 'replyStatus':
+      return `<td><span class="tag ${r.replyStatus==='Replied'?'green':r.replyStatus==='Pending'?'orange':''}">${r.replyStatus==='Replied'?'已回复 / Replied':r.replyStatus==='Pending'?'暂未回复 / Pending':'无需回复'}</span></td>`;
+    case 'replyDate':
+      return `<td>${esc(formatDate(r.replyDate))}</td>`;
+    case 'replyRefNo':
+      return `<td title="${esc(r.replyRefNo||'—')}">${esc(r.replyRefNo||'—')}</td>`;
+    case 'description':
+      return `<td title="${esc(r.description||'—')}">${esc(r.description||'—')}</td>`;
+    case 'remarks':
+      return `<td title="${esc(r.remarks||'—')}">${esc(r.remarks||'—')}</td>`;
+    case 'actions':
+      return `<td class="action-cell" style="text-align:center;">
+        <div class="dropdown">
+          <button type="button" class="small secondary dropdown-btn">操作 ▼</button>
+          <div class="dropdown-content">
+            <button type="button" class="small secondary" onclick="editRecord('${r.id}')">编辑 / Edit</button>
+            <button type="button" class="small danger" onclick="deleteRecord('${r.id}')">删除 / Delete</button>
+          </div>
+        </div>
+      </td>`;
+    default:
+      return '<td>—</td>';
+  }
+}
+
 function render(){
- $('total').textContent=data.length;$('outgoing').textContent=data.filter(x=>x.type.toLowerCase().includes('outgoing')).length;$('incoming').textContent=data.filter(x=>x.type.toLowerCase().includes('incoming')).length;$('pending').textContent=data.filter(x=>x.replyStatus==='Pending').length;
- const list=filtered();$('resultCount').textContent=`显示 ${list.length} 条记录 / ${list.length} records（共 ${data.length} 条 / total）`;
- 
- $('rows').innerHTML=list.length?list.map(r=>`<tr>
-   <td title="${esc(r.project)}">${esc(r.project)}</td>
-   <td><span class="tag">${esc(r.type)}</span></td>
-   <td title="${esc(r.refNo||'—')}">${esc(r.refNo||'—')}</td>
-   <td>${esc(formatDate(r.letterDate))}</td>
-   <td title="${esc(r.subject)}">${esc(r.subject)}</td>
-   <td title="${esc(r.chineseSubject||'—')}">${esc(r.chineseSubject||'—')}</td>
-   <td title="${esc(r.from)}">${esc(r.from)}</td>
-   <td title="${esc(r.to)}">${esc(r.to)}</td>
-   <td title="${esc(r.cc||'—')}">${esc(r.cc||'—')}</td>
-   <td>${r.replyRequired==='Yes'?'是 / Yes':'否 / No'}</td>
-   <td><span class="tag ${r.replyStatus==='Replied'?'green':r.replyStatus==='Pending'?'orange':''}">${r.replyStatus==='Replied'?'已回复 / Replied':r.replyStatus==='Pending'?'暂未回复 / Pending':'无需回复'}</span></td>
-   <td>${esc(formatDate(r.replyDate))}</td>
-   <td title="${esc(r.replyRefNo||'—')}">${esc(r.replyRefNo||'—')}</td>
-   <td class="action-cell" style="text-align:center;">
-     <div class="dropdown">
-       <button type="button" class="small secondary dropdown-btn">操作 ▼</button>
-       <div class="dropdown-content">
-         <button type="button" class="small secondary" onclick="editRecord('${r.id}')">编辑 / Edit</button>
-         <button type="button" class="small danger" onclick="deleteRecord('${r.id}')">删除 / Delete</button>
-       </div>
-     </div>
-   </td>
- </tr>`).join(''):'<tr><td colspan="14" class="empty">没有符合条件的记录 / No matching records</td></tr>';
+ $('total').textContent=data.length;
+ $('outgoing').textContent=data.filter(x=>x.type.toLowerCase().includes('outgoing')).length;
+ $('incoming').textContent=data.filter(x=>x.type.toLowerCase().includes('incoming')).length;
+ $('pending').textContent=data.filter(x=>x.replyStatus==='Pending').length;
+ const list=filtered();
+ $('resultCount').textContent=`显示 ${list.length} 条记录 / ${list.length} records（共 ${data.length} 条 / total）`;
+ const cols = getActiveColumns();
+
+ $('rows').innerHTML = list.length
+   ? list.map(r => '<tr>' + cols.map(col => renderCell(r, col)).join('') + '</tr>').join('')
+   : `<tr><td colspan="${cols.length}" class="empty">没有符合条件的记录 / No matching records</td></tr>`;
 }
 
 function initTableResizer() {
@@ -441,7 +727,11 @@ function initTableResizer() {
       
       const mouseMoveHandler = function(e) {
         const dx = e.clientX - x;
-        th.style.width = Math.max(70, w + dx) + 'px';
+        const newW = Math.max(70, w + dx);
+        th.style.width = newW + 'px';
+        const key = th.getAttribute('data-key');
+        const colObj = ALL_COLUMNS.find(c=>c.key===key);
+        if(colObj) colObj.width = newW;
       };
       
       const mouseUpHandler = function() {
@@ -456,6 +746,8 @@ function initTableResizer() {
     });
   });
 }
+
+$('refNo').addEventListener('input', updateRefLookup);
 
 $('letterForm').addEventListener('submit',async e=>{
  e.preventDefault();
@@ -504,6 +796,7 @@ window.editRecord=id=>{
   if(r.replyStatus==='Replied'){$('replyRefNo').disabled=false;}
   $('formTitle').textContent='信函修改 / Edit Correspondence';
   $('saveBtn').textContent='保存修改并同步 / Save Changes';
+  updateRefLookup();
   window.scrollTo({top:0,behavior:'smooth'});
 };
 
@@ -524,10 +817,12 @@ $('exportBtn').onclick=()=>{
 $('backupBtn').onclick=()=>download(new Blob([JSON.stringify({data,options},null,2)],{type:'application/json'}),'Correspondence_Backup.json');
 function download(blob,name){const a=document.createElement('a'),u=URL.createObjectURL(blob);a.href=u;a.download=name;a.click();URL.revokeObjectURL(u)}
 
+updateQuickEditBtn();
 renderOptions();
+renderColPicker();
+renderTableHead();
 replyControls();
 loadFromCloud();
-initTableResizer();
 </script>
 </body>
 </html>
